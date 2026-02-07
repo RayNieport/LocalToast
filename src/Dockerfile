@@ -9,9 +9,12 @@ RUN apt-get update && apt-get install -y \
 
 # Install Hugo Extended
 ARG HUGO_VER="0.152.2"
-RUN curl -L "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VER}/hugo_extended_${HUGO_VER}_linux-amd64.deb" -o hugo.deb \
-    && dpkg -i hugo.deb \
-    && rm hugo.deb
+ARG TARGETARCH
+RUN ARCH="amd64" && \
+    if [ "$TARGETARCH" = "arm64" ]; then ARCH="arm64"; fi && \
+    curl -L "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VER}/hugo_extended_${HUGO_VER}_linux-${ARCH}.deb" -o hugo.deb && \
+    dpkg -i hugo.deb && \
+    rm hugo.deb
 
 # Python Setup
 WORKDIR /app
