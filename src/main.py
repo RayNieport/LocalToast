@@ -239,7 +239,7 @@ def process_and_save_recipe(data, original_slug=None):
         img_filename_jpg = "cover.jpg" if original_img else (data.get('existing_image') or "")
         if not img_filename_jpg and not original_img:
             try: 
-                original_img = Image.open("/app/src/default.jpg").convert('RGB')
+                original_img = Image.open("/app/default.jpg").convert('RGB')
                 img_filename_jpg = "cover.jpg"
             except: pass
 
