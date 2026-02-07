@@ -1,0 +1,128 @@
+{{ define "title" }}Home | {{ .Site.Title }}{{ end }}
+{{ define "main" }}
+<div class="recipe-header">
+    <h1>All Recipes</h1>
+</div>
+
+<div class="recipe-grid">
+    {{/* 1. Fetch and Paginate Recipes */}}
+    {{ $recipes := where .Site.RegularPages "Section" "recipes" }}
+    {{ $paginator := .Paginate $recipes }}
+
+    {{ range $paginator.Pages }}
+    <article class="recipe-card">
+        <a href="{{ .RelPermalink }}">
+            
+            {{/* Image Logic: Prefer WebP, Fallback to JPG. Prefer Small, Fallback to Master. */}}
+            {{ $small_jpg := .Resources.GetMatch "cover_small.jpg" }}
+            {{ $small_webp := .Resources.GetMatch "cover_small.webp" }}
+            {{ $master_jpg := .Resources.GetMatch "cover.jpg" }}
+            
+            {{ $jpg := or $small_jpg $master_jpg }}
+            {{ $webp := $small_webp }}
+
+            <div class="aspect-ratio-box">
+                {{ if $jpg }}
+                <picture>
+                    {{ if $webp }}
+                    <source srcset="{{ $webp.RelPermalink }}" type="image/webp">
+                    {{ end }}
+                    <img 
+                        src="{{ $jpg.RelPermalink }}" 
+                        alt="{{ .Title }}" 
+                        class="aspect-ratio-img"
+                        width="800" height="600"
+                        loading="lazy">
+                </picture>
+                {{ else }}
+                    {{ end }}
+            </div>
+
+            <h2>{{ .Title }}</h2>
+
+            <div class="card-meta">
+                {{ range .Params.tags }}
+                <span class="meta-tag">#{{ . }}</span>
+                {{ end }}
+            </div>
+        </a>
+    </article>
+    {{ end }}
+</div>
+
+{{/* 2. Pagination Controls */}}
+{{ if gt $paginator.TotalPages 1 }}
+<div class="pagination">
+    
+    <div class="pagination-col pagination-left">
+        {{ if ne $paginator.PageNumber 1 }}
+        <a href="{{ $paginator.First.URL }}" class="btn-page" aria-label="First Page">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M18.41,16.59L13.82,12L18.41,7.41L17,6L11,12L17,18L18.41,16.59M6,6H8V18H6V6Z" /></svg>
+        </a>
+        {{ end }}
+
+        {{ if $paginator.HasPrev }}
+        <a href="{{ $paginator.Prev.URL }}" class="btn-page" aria-label="Previous Page">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" /></svg>
+        </a>
+        {{ end }}
+    </div>
+
+    <form class="pagination-jump" onsubmit="jumpToPage(event, {{ $paginator.TotalPages }})">
+        <span class="jump-text">Page</span>
+        <input type="number" id="pageJumpInput" 
+               class="jump-input" 
+               value="{{ $paginator.PageNumber }}" 
+               min="1" max="{{ $paginator.TotalPages }}">
+        <span class="jump-text">of {{ $paginator.TotalPages }}</span>
+        <button type="submit" style="display:none;">Go</button>
+    </form>
+
+    <div class="pagination-col pagination-right">
+        {{ if $paginator.HasNext }}
+        <a href="{{ $paginator.Next.URL }}" class="btn-page" aria-label="Next Page">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>
+        </a>
+        {{ end }}
+
+        {{ if ne $paginator.PageNumber $paginator.TotalPages }}
+        <a href="{{ $paginator.Last.URL }}" class="btn-page" aria-label="Last Page">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M5.59,7.41L10.18,12L5.59,16.59L7,18L13,12L7,6L5.59,7.41M16,6H18V18H16V6Z" /></svg>
+        </a>
+        {{ end }}
+    </div>
+
+</div>
+
+<script>
+/*
+ * Handles pagination jump box.
+ * Parses current URL to maintain directory structure (e.g. /recipes/page/2/)
+ */
+function jumpToPage(e, totalPages) {
+    e.preventDefault();
+    var input = document.getElementById('pageJumpInput');
+    var pageNum = parseInt(input.value);
+
+    // Bounds check to prevent 404s
+    if (isNaN(pageNum) || pageNum < 1) pageNum = 1;
+    if (pageNum > totalPages) pageNum = totalPages;
+
+    var currentPath = window.location.pathname;
+    
+    // Strip trailing slash for consistency
+    if(currentPath.endsWith('/')) currentPath = currentPath.slice(0, -1);
+    
+    // Remove existing pagination segments
+    var cleanPath = currentPath.replace(/\/page\/\d+$/, '');
+
+    // Reconstruct URL
+    if (pageNum === 1) {
+        window.location.href = cleanPath + "/";
+    } else {
+        window.location.href = cleanPath + "/page/" + pageNum + "/";
+    }
+}
+</script>
+{{ end }}
+{{ end }}

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Batch Import</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/editor.css">
+</head>
+<body>
+    <div class="container editor-container">
+        <h1>Review Recipes</h1>
+        <p class="form-desc">Edit tags below, then click "Import" to save.</p>
+        
+        <input type="hidden" id="batchId" value="{{ batch_id }}">
+
+        <div class="bulk-grid" id="bulkGrid">
+            {% for res in results %}
+                <div class="bulk-card" data-id="{{ res.id }}">
+                    <div class="bulk-status">
+                        {% if res.success and not res.is_duplicate %}
+                            <svg class="status-svg icon-success" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                            </svg>
+                        {% elif res.is_duplicate %}
+                            <svg class="status-svg icon-failure" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                            </svg>
+                        {% else %}
+                            <svg class="status-svg icon-failure" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                            </svg>
+                        {% endif %}
+                    </div>
+
+                    <div class="bulk-content">
+                        <div class="result-main">
+                            {{ res.title or res.url }}
+                        </div>
+                        
+                        {% if res.success and not res.is_duplicate %}
+                            <div class="bulk-row">
+                                <div class="bulk-col-full">
+                                    <label class="mini-label">Tags</label>
+                                    <div class="autocomplete-wrapper">
+                                        <input type="text" 
+                                               id="tag-{{ loop.index }}" 
+                                               name="tags" 
+                                               value="{{ res.tags | lower }}" 
+                                               data-default="{{ res.tags | lower }}"
+                                               class="mini-input taxonomy-input" 
+                                               autocomplete="off">
+                                        <span id="badge-tag-{{ loop.index }}" class="status-badge is-hidden"></span>
+                                        <ul id="list-tag-{{ loop.index }}" class="suggestions-list"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="result-sub status-error-msg">
+                                {% if res.is_duplicate %}
+                                    Recipe already exists. Import skipped.
+                                {% else %}
+                                    {{ res.message }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="sticky-footer">
+        <div class="footer-actions">
+            <div class="footer-form">
+                <button type="button" class="btn-submit btn-cancel" onclick="cancelBatch()">Cancel</button>
+            </div>
+            <button type="button" class="btn-submit btn-confirm" onclick="confirmAll()">
+                Import
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Inject tag data from Jinja so we don't need a separate API call.
+        var ALL_TAGS_DATA = {{ known_tags | tojson | safe }};
+        var ALL_TAGS = ALL_TAGS_DATA.map(function(item) { return item[0].toLowerCase(); }).sort();
+        
+        /* * Autocomplete Logic
+         * Handles the dropdown suggestions and the "New vs Existing" badge state.
+         */
+        function setupRowAutocomplete(input, list, badge, sourceData) {
+            function updateBadge(value) {
+                var checkVal = value;
+                if (checkVal.trim() === "") { checkVal = input.getAttribute('data-default'); }
+                if (!checkVal || !checkVal.trim()) { badge.classList.add('is-hidden'); return; }
+                
+                var terms = checkVal.split(',').map(function(t) { return t.trim().toLowerCase(); }).filter(function(t) { return t; });
+                if (terms.length === 0) { badge.classList.add('is-hidden'); return; }
+                
+                var exists = terms.every(function(term) { return sourceData.indexOf(term) !== -1; });
+                badge.classList.remove('is-hidden');
+                
+                if (exists) { badge.className = 'status-badge status-match'; badge.innerText = '✓'; } 
+                else { badge.className = 'status-badge status-new'; badge.innerText = '+'; }
+            }
+
+            function renderList(filterText) {
+                var matches = [];
+                if (!filterText) { matches = sourceData.slice(0, 50); }
+                else {
+                    var term = filterText.toLowerCase();
+                    matches = sourceData.filter(function(item) { return item.indexOf(term) > -1; });
+                }
+                list.innerHTML = '';
+                if (matches.length > 0) {
+                    matches.forEach(function(match) {
+                        var li = document.createElement('li');
+                        li.className = 'suggestion-item';
+                        li.innerText = match;
+                        li.addEventListener('mousedown', function(e) { e.preventDefault(); });
+                        li.addEventListener('click', function() {
+                            var terms = input.value.split(',');
+                            terms.pop(); terms.push(match);
+                            input.value = terms.join(', ') + ', ';
+                            list.classList.remove('visible');
+                            updateBadge(input.value);
+                        });
+                        list.appendChild(li);
+                    });
+                    list.classList.add('visible');
+                } else { list.classList.remove('visible'); }
+            }
+
+            input.addEventListener('input', function() {
+                updateBadge(this.value); 
+                var val = this.value;
+                var filterTerm = val.split(',').pop();
+                renderList(filterTerm.trim());
+            });
+            
+            input.addEventListener('focus', function() {
+                var val = this.value;
+                var filterTerm = val.split(',').pop();
+                renderList(filterTerm.trim());
+            });
+            
+            input.addEventListener('blur', function() {
+                if (this.value.trim() === "") {
+                    var def = this.getAttribute('data-default');
+                    if (def) { this.value = def; updateBadge(def); }
+                }
+                // Delay hiding the list so clicks register
+                setTimeout(function() { list.classList.remove('visible'); }, 200);
+            });
+            
+            // Initial check
+            updateBadge(input.value);
+        }
+
+        // Initialize all autocomplete inputs
+        var inputs = document.querySelectorAll('.taxonomy-input');
+        for (var i = 0; i < inputs.length; i++) {
+            var input = inputs[i];
+            var listId = input.id.replace('tag-', 'list-tag-');
+            var badgeId = input.id.replace('tag-', 'badge-tag-');
+            var list = document.getElementById(listId);
+            var badge = document.getElementById(badgeId);
+            setupRowAutocomplete(input, list, badge, ALL_TAGS);
+        }
+
+        /*
+         * Cancel Batch
+         * Sends a "fire and forget" signal to clean up memory, then immediately
+         * navigates away so the user doesn't have to wait.
+         */
+        function cancelBatch() {
+            var batchId = document.getElementById('batchId').value;
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/bulk-cancel", true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.send("batch_id=" + encodeURIComponent(batchId));
+
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = "/add";
+            }
+        }
+
+        /*
+         * Commit Batch
+         * Collects valid recipes and sends them to the backend for saving.
+         */
+        function confirmAll() {
+            var btn = document.querySelector('.btn-confirm');
+            var batchId = document.getElementById('batchId').value;
+            
+            btn.innerHTML = 'Downloading Images...';
+            btn.disabled = true;
+
+            var cards = document.querySelectorAll('.bulk-card');
+            var items = [];
+
+            for (var i = 0; i < cards.length; i++) {
+                var card = cards[i];
+                var id = card.getAttribute('data-id');
+                // Only include cards that have input fields (non-duplicates)
+                if (id !== null && card.querySelector('input[name="tags"]')) {
+                    var tagVal = card.querySelector('input[name="tags"]').value;
+                    items.push({
+                        id: parseInt(id),
+                        tags: tagVal
+                    });
+                }
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/bulk-commit", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            if (data.success) {
+                                // Force a cache bust on redirect
+                                window.location.href = "/?t=" + new Date().getTime();
+                            } else {
+                                throw new Error(data.message);
+                            }
+                        } catch (e) {
+                            alert("Error saving: " + e.message);
+                            btn.innerHTML = 'Retry';
+                            btn.disabled = false;
+                        }
+                    } else {
+                        alert("Network Error: " + xhr.status);
+                        btn.innerHTML = 'Retry';
+                        btn.disabled = false;
+                    }
+                }
+            };
+            
+            xhr.send(JSON.stringify({
+                batch_id: batchId,
+                items: items
+            }));
+        }
+    </script>
+</body>
+</html>

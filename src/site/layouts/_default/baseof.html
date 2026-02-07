@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ block "title" . }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
+    
+    {{/* Description Logic: Smart fallback from Home -> Frontmatter -> Summary -> Title */}}
+    {{ $desc := "" }}
+    {{ if .IsHome }}
+        {{ $desc = "A collection of recipes optimized for simple, distraction-free cooking." }}
+    {{ else if .Description }}
+        {{ $desc = .Description }}
+    {{ else if .Summary }}
+        {{ $desc = .Summary | plainify | htmlUnescape | truncate 160 }}
+    {{ else }}
+        {{ $desc = .Title | printf "Browse recipes for %s" }}
+    {{ end }}
+    
+    <meta name="description" content="{{ $desc }}">
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" href="/favicon.ico">
+    
+    {{/* Performance Strategy: Preload LCP Images
+       We want the browser to start downloading the main images immediately, 
+       even before it finishes reading the CSS.
+    */}}
+    {{ if .IsHome }}
+        {{/* For the homepage, grab the first 2 recipes to fill the "above the fold" view */}}
+        {{ range first 2 (where .Site.RegularPages "Section" "recipes") }}
+            
+            {{/* Prioritize the small WebP (99% chance this is what we show) */}}
+            {{ $target := .Resources.GetMatch "cover_small.webp" }}
+            
+            {{ if not $target }}
+                {{ $target = .Resources.GetMatch "cover.webp" }}
+            {{ end }}
+
+            {{ if not $target }}
+                {{ $target = or (.Resources.GetMatch "cover_small.jpg") (.Resources.GetMatch "cover.jpg") }}
+            {{ end }}
+            
+            {{ if $target }}
+            <link rel="preload" as="image" href="{{ $target.RelPermalink }}" fetchpriority="high">
+            {{ end }}
+        {{ end }}
+
+    {{ else if and (eq .Section "recipes") .IsPage }}
+        
+        {{/* For a single recipe, preload the main cover image */}}
+        {{ $target := or (.Resources.GetMatch "cover.webp") (.Resources.GetMatch "cover.jpg") }}
+        
+        {{ if $target }}
+        <link rel="preload" as="image" href="{{ $target.RelPermalink }}" fetchpriority="high">
+        {{ end }}
+
+    {{ end }}
+
+    {{/* Critical CSS Inlining
+       We read the files directly from disk and inject them into the head.
+       This prevents the "Flash of Unstyled Content" and saves a network round-trip.
+    */}}
+    <style>
+        {{ readFile "static/css/base.css" | safeCSS }}
+    </style>
+
+    {{ if or (eq .Section "recipes") (.IsHome) (eq .Section "tags") }}
+    <style>
+        {{ readFile "static/css/recipe.css" | safeCSS }}
+    </style>
+    {{ end }}
+
+    {{ if eq .RelPermalink "/add/" }}
+    <style>
+        {{ readFile "static/css/editor.css" | safeCSS }}
+    </style>
+    {{ end }}
+</head>
+
+<body>
+    <div class="container">
+        <header class="site-header">
+            <h1 class="site-title">
+                <a href="/" class="brand-link">
+                    <img src="/logo.png" alt="" class="brand-logo" width="32" height="32">
+                    <span>{{ .Site.Title }}</span>
+                </a>
+            </h1>
+
+            <nav class="nav-links">
+                <a href="/tags/" class="nav-link-text">Browse</a>
+                <a href="/add/" class="btn-nav">+ Add</a>
+            </nav>
+        </header>
+
+        <main>
+            {{ block "main" . }}{{ end }}
+        </main>
+
+        <footer class="site-footer">
+            Served hot by LocalToast
+        </footer>
+    </div>
+</body>
+
+</html>

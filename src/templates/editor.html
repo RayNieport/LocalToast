@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Recipe</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/editor.css">
+</head>
+<body>
+    <div class="container editor-container">
+        <h1>Review & Edit</h1>
+        
+        <div id="error-banner"></div>
+        
+        {% if error %}
+        <div class="error-banner">
+            <strong>⚠️ Import Issue:</strong> {{ error }}<br>
+            <small>Switched to Manual Entry Mode.</small>
+        </div>
+        {% endif %}
+        
+        <form action="/save" method="post" enctype="multipart/form-data" class="editor-form" id="mainForm">
+            <input type="hidden" name="original_slug" id="originalSlugInput" value="{{ slug }}">
+            <input type="hidden" name="existing_image" value="{{ existing_image }}">
+
+            <div class="form-group">
+                <label class="form-label">Recipe Title</label>
+                <div class="input-wrapper">
+                    <input type="text" id="titleInput" name="title" value="{{ title }}" class="form-input" required onfocus="this.select()">
+                    <span id="titleBadge" class="status-badge is-hidden"></span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Image URL</label>
+                
+                <input type="text" name="image_url" id="imgUrlInput" value="{{ image_url }}" class="form-input" onfocus="this.select()" onblur="checkImageAvailability()">
+                
+                <div id="imgStatus" class="input-status-msg"></div>
+
+                <div class="or-separator">- OR -</div>
+                
+                <label class="form-label label-with-spacing">Upload Image (Overrides URL)</label>
+                <input type="file" name="file" class="form-file-input" accept="image/*">
+                
+                {% if image_url or existing_image %}
+                <div class="preview-box">
+                   <small class="preview-caption">Current Image:</small>
+                   {% if image_url %}
+                     <img src="{{ image_url }}" class="preview-img" onerror="this.classList.add('is-hidden')">
+                   {% else %}
+                     <div class="preview-placeholder-text">(Existing Local Image)</div>
+                   {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Source URL</label>
+                <input type="text" name="source_url" id="sourceUrlInput" value="{{ source_url }}" class="form-input" onfocus="this.select()">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Tags <span class="help-text">(Comma separated)</span></label>
+                <div class="autocomplete-wrapper">
+                    <input type="text" id="tagInput" name="tags" value="{{ tags }}" placeholder="{{ tags }}" data-default="{{ tags }}" class="form-input" autocomplete="off" onfocus="this.select()">
+                    <span id="tagBadge" class="status-badge is-hidden"></span>
+                    <ul id="tagList" class="suggestions-list"></ul>
+                </div>
+            </div>
+            
+            <div class="form-group form-group-spaced">
+                <label class="form-label">Ingredients <span class="help-text">(One per line)</span></label>
+                <textarea id="ingredientsInput" name="ingredients" class="form-input form-textarea" onfocus="this.select()">{{ ingredients }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Instructions <span class="help-text">(Markdown supported)</span></label>
+                <textarea id="instructionsInput" name="instructions" class="form-input form-textarea-large">{{ instructions }}</textarea>
+            </div>
+            
+            <div class="editor-actions">
+                <button type="button" onclick="history.back()" class="btn-cancel">
+                    <svg class="btn-icon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                    Cancel
+                </button>
+
+                <button type="button" onclick="saveRecipe()" class="btn-submit btn-save-primary">
+                    Save to Cookbook
+                </button>
+            </div>
+        </form>
+
+        {% if slug %}
+        <div class="delete-section">
+            <form action="/delete" method="post" id="deleteForm">
+                <input type="hidden" name="slug" value="{{ slug }}">
+                <button type="button" class="btn-cancel btn-delete btn-full" onclick="openDeleteModal()">
+                    <svg class="btn-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>
+                    Delete Recipe
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="deleteModalOverlay" class="modal-overlay">
+        <div class="modal-box">
+            <h2 class="modal-title">Delete Recipe?</h2>
+            <p class="modal-text">Are you sure you want to delete this recipe?<br><br>This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-nav btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button type="button" class="btn-nav btn-danger-confirm" onclick="confirmDelete()">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple helper to handle AJAX requests since iOS 9 doesn't support 'fetch'.
+        function xhrRequest(method, url, formData, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.open(method, url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            callback(null, data);
+                        } catch (e) {
+                            callback(e, null);
+                        }
+                    } else {
+                        callback(new Error("Status " + xhr.status), null);
+                    }
+                }
+            };
+            xhr.send(formData);
+        }
+
+        /*
+         * Main Save Handler
+         * Performs basic validation on the client first to save a network round-trip.
+         */
+        function saveRecipe() {
+            var title = document.getElementById('titleInput').value;
+            var ingredients = document.getElementById('ingredientsInput').value;
+            var instructions = document.getElementById('instructionsInput').value;
+            var errorBanner = document.getElementById('error-banner');
+            
+            if (!title || !title.trim() || !ingredients || !ingredients.trim() || !instructions || !instructions.trim()) {
+                errorBanner.innerText = "⚠️ Missing Information: Please fill in Title, Ingredients, and Instructions.";
+                errorBanner.style.display = 'block';
+                window.scrollTo(0, 0);
+                return;
+            }
+
+            errorBanner.style.display = 'none';
+            var form = document.getElementById('mainForm');
+            var formData = new FormData(form);
+
+            xhrRequest("POST", "/save", formData, function(err, response) {
+                if (!err && response && response.success) {
+                    window.location.href = response.redirect_url;
+                } else {
+                    var msg = (response && response.message) ? response.message : "Unknown error saving recipe.";
+                    errorBanner.innerText = "⚠️ Error: " + msg;
+                    errorBanner.style.display = 'block';
+                    window.scrollTo(0, 0);
+                }
+            });
+        }
+
+        /*
+         * Title Checker
+         * Watches the title input to warn if a recipe with this name already exists.
+         * Uses a debounce timer to avoid hammering the server while typing.
+         */
+        (function() {
+            var titleInput = document.getElementById('titleInput');
+            var originalSlug = document.getElementById('originalSlugInput').value;
+            var badge = document.getElementById('titleBadge');
+            var timer = null;
+
+            if (titleInput) {
+                checkTitle(titleInput.value); // Run once on load (e.g. for imports)
+
+                titleInput.addEventListener('input', function() {
+                    if (timer) clearTimeout(timer);
+                    var val = this.value;
+                    timer = setTimeout(function() { checkTitle(val); }, 500);
+                });
+            }
+
+            function checkTitle(title) {
+                if (!title || !title.trim()) {
+                    badge.classList.add('is-hidden');
+                    return;
+                }
+
+                var formData = new FormData();
+                formData.append('title', title);
+                if (originalSlug) formData.append('original_slug', originalSlug);
+
+                xhrRequest("POST", "/check-title", formData, function(err, data) {
+                    if (!err && data) {
+                        if (data.exists) {
+                            badge.classList.remove('is-hidden');
+                            badge.className = 'status-badge status-taken';
+                            badge.innerText = '✕ Already Exists';
+                        } else {
+                            badge.classList.add('is-hidden');
+                            badge.className = 'status-badge title-badge';
+                        }
+                    } else {
+                        console.error("Title check failed", err);
+                    }
+                });
+            }
+        })();
+
+        /*
+         * Image Checker
+         * Verifies if the remote server allows downloading the image (checks for 403s/hotlink protection).
+         */
+        function checkImageAvailability() {
+            var urlInput = document.getElementById('imgUrlInput');
+            var sourceInput = document.getElementById('sourceUrlInput');
+            var statusDiv = document.getElementById('imgStatus');
+            var url = urlInput.value.trim();
+
+            statusDiv.className = 'input-status-msg';
+            statusDiv.innerHTML = '';
+
+            if (!url) return;
+
+            statusDiv.innerHTML = 'Checking server access...';
+            statusDiv.className = 'input-status-msg status-checking';
+
+            var formData = new FormData();
+            formData.append('url', url);
+            if(sourceInput.value) formData.append('source_url', sourceInput.value);
+
+            xhrRequest("POST", "/test-image", formData, function(err, data) {
+                if (!err && data && data.success) {
+                    statusDiv.innerHTML = '✓ Image is downloadable';
+                    statusDiv.className = 'input-status-msg status-ok';
+                } else {
+                    statusDiv.innerHTML = '⚠️ Server cannot download this image. Please upload manually.';
+                    statusDiv.className = 'input-status-msg status-fail';
+                }
+            });
+        }
+
+        // Modal Logic
+        function openDeleteModal() {
+            var el = document.getElementById('deleteModalOverlay');
+            if(el) el.style.display = 'block';
+        }
+
+        function closeDeleteModal() {
+            var el = document.getElementById('deleteModalOverlay');
+            if(el) el.style.display = 'none';
+        }
+
+        function confirmDelete() {
+            document.getElementById('deleteForm').submit();
+        }
+
+        /* * Autocomplete
+         * Handles suggestions for the Tags field.
+         */
+        (function() {
+            var ALL_TAGS = {{ known_tags | tojson | safe }};
+
+            function setupAutocomplete(inputId, listId, badgeId, sourceData) {
+                var input = document.getElementById(inputId);
+                var list = document.getElementById(listId);
+                var badge = document.getElementById(badgeId);
+
+                if (!input || !list || !badge) return;
+                
+                var lowerSource = sourceData.map(function(item) { 
+                    return item[0].toLowerCase(); 
+                });
+
+                function updateBadge(value) {
+                    var checkVal = (value.trim() === "") ? input.getAttribute('data-default') : value;
+                    if (!checkVal || !checkVal.trim()) { 
+                        badge.classList.add('is-hidden'); 
+                        return; 
+                    }
+
+                    var terms = checkVal.split(',').map(function(t) { return t.trim().toLowerCase(); }).filter(function(t) { return t; });
+                    if (terms.length === 0) { badge.classList.add('is-hidden'); return; }
+                    
+                    var exists = terms.every(function(term) { return lowerSource.indexOf(term) !== -1; });
+
+                    badge.classList.remove('is-hidden');
+                    if (exists) {
+                        badge.className = 'status-badge status-match';
+                        badge.innerText = '✓ Existing';
+                    } else {
+                        badge.className = 'status-badge status-new';
+                        badge.innerText = '+ New';
+                    }
+                }
+
+                updateBadge(input.value);
+
+                function renderList(filterText) {
+                    var matches = [];
+                    
+                    if (!filterText) {
+                        // Default to top 50 popular tags
+                        matches = sourceData.slice(0, 50); 
+                    } else {
+                        var term = filterText.toLowerCase();
+                        matches = sourceData.filter(function(item) {
+                            return item[0].toLowerCase().indexOf(term) > -1;
+                        });
+                    }
+
+                    list.innerHTML = '';
+                    if (matches.length > 0) {
+                        matches.forEach(function(item) {
+                            var name = item[0];
+                            var count = item[1];
+
+                            var li = document.createElement('li');
+                            li.className = 'suggestion-item';
+                            li.innerHTML = '<span>' + name + '</span>' + 
+                                           '<span class="suggestion-count">' + count + '</span>';
+                            
+                            if(filterText && name.toLowerCase() === filterText.toLowerCase()) {
+                                li.style.fontWeight = 'bold';
+                                li.style.color = '#fff';
+                            }
+
+                            li.addEventListener('mousedown', function(e) { e.preventDefault(); });
+
+                            li.addEventListener('click', function() {
+                                var terms = input.value.split(',');
+                                terms.pop(); 
+                                terms.push(name); 
+                                input.value = terms.join(', ') + ', '; 
+                                list.classList.remove('visible');
+                                updateBadge(input.value);
+                                input.focus();
+                            });
+                            list.appendChild(li);
+                        });
+                        list.classList.add('visible');
+                    } else {
+                        list.classList.remove('visible');
+                    }
+                }
+
+                input.addEventListener('input', function() {
+                    updateBadge(this.value);
+                    var val = this.value;
+                    var parts = val.split(',');
+                    var filterTerm = parts[parts.length - 1];
+                    renderList(filterTerm.trim());
+                });
+
+                input.addEventListener('focus', function() {
+                    var val = this.value;
+                    var parts = val.split(',');
+                    var filterTerm = parts[parts.length - 1];
+                    renderList(filterTerm.trim());
+                });
+
+                input.addEventListener('blur', function() {
+                    if (this.value.trim() === "") {
+                        var def = this.getAttribute('data-default');
+                        if (def) { this.value = def; updateBadge(def); }
+                    }
+                    setTimeout(function() { list.classList.remove('visible'); }, 200);
+                });
+            }
+
+            setupAutocomplete('tagInput', 'tagList', 'tagBadge', ALL_TAGS);
+        })();
+    </script>
+</body>
+</html>

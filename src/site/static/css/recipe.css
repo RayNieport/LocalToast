@@ -1,0 +1,225 @@
+/* Recipe View & Grid
+   Layouts for the home grid and single recipe details.
+*/
+
+/* Homepage Grid 
+   Using space-between to handle alignment without gap.
+*/
+.recipe-grid {
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: space-between;
+}
+
+.recipe-card {
+    width: 48%;
+    background: #1e1e1e; border: 1px solid #555; border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    overflow: hidden;
+    /* iPad 2 GPU Hack: Forces hardware acceleration to prevent flickering on scroll */
+    -webkit-transform: translateZ(0); transform: translateZ(0);
+    margin-bottom: 20px;
+}
+
+.recipe-card h2 { font-size: 1.2rem; margin: 15px; color: #fff; line-height: 1.3; }
+.card-meta { padding: 0 15px 15px; font-size: 0.85rem; color: #ccc; }
+
+.aspect-ratio-box {
+    position: relative; width: 100%; padding-bottom: 75%;
+    overflow: hidden; background: #2a2a2a; border-bottom: 1px solid #555;
+}
+.aspect-ratio-img {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+}
+
+/* Single Recipe Detail 
+   Centered container reading view.
+*/
+.recipe-detail {
+    background: #1e1e1e; padding: 20px; border-radius: 8px;
+    margin-bottom: 40px; border: 1px solid #555;
+    width: 100%; max-width: 800px; margin-left: auto; margin-right: auto;
+}
+
+.recipe-header { text-align: center; margin-bottom: 30px; }
+.recipe-title { font-size: 2rem; margin-bottom: 10px; line-height: 1.2; color: #fff; }
+.recipe-meta { color: #ccc; font-size: 0.9rem; margin-bottom: 15px; }
+.recipe-meta a { font-weight: bold; color: #fff; text-transform: uppercase; }
+.meta-separator { margin: 0 5px; }
+
+.recipe-image { width: 100%; border-radius: 4px; margin-bottom: 30px; border: 1px solid #555; }
+
+.tag-cloud { display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 25px; }
+.tag-pill {
+    background: #333; padding: 4px 12px; border-radius: 15px;
+    font-size: 0.85rem; color: #fff; border: 1px solid #666; margin: 4px;
+}
+
+/* Markdown Content Styling */
+.content-wrapper { font-size: 1.1rem; line-height: 1.7; color: #f0f0f0; }
+.content-wrapper ul {
+    list-style: none; padding: 0; margin: 20px 0; border: 1px solid #555;
+    border-radius: 4px; overflow: hidden;
+}
+.content-wrapper ul li { padding: 15px; margin: 0; border-bottom: 1px solid #555; color: #fff; }
+.content-wrapper ul li:nth-child(odd) { background-color: #2a2a2a; }
+.content-wrapper ul li:nth-child(even) { background-color: #1e1e1e; }
+.content-wrapper ul li:last-child { border-bottom: none; }
+.content-wrapper ol { padding-left: 20px; color: #eee; }
+.content-wrapper ol li { margin-bottom: 20px; padding-left: 10px; }
+
+/* Footer Links & Source */
+.source-container {
+    margin-top: 50px; padding-top: 20px; border-top: 2px solid #555;
+    text-align: center;
+    display: flex; justify-content: center; align-items: center; flex-wrap: wrap;
+}
+.source-container > * { margin: 6px; }
+.edit-form { display: inline-block; }
+
+/* Wake Lock "Pill" */
+.wake-lock-label {
+    display: none; /* JS toggles this if supported */
+    align-items: center;
+    cursor: pointer;
+    color: #aaa;
+    font-weight: normal;
+    
+    background: rgba(255,255,255,0.05);
+    padding: 1px 10px; 
+    border-radius: 20px;
+    border: 1px solid #444;
+    transition: background 0.2s, color 0.2s;
+    vertical-align: middle;
+}
+.wake-lock-label:hover { 
+    color: #fff; 
+    background: rgba(255,255,255,0.15);
+    border-color: #666;
+}
+.wake-lock-label input { margin-right: 6px; }
+.wake-lock-label span { font-size: 0.85rem; }
+
+/* Browse & Search
+*/
+.term-nav-wrapper { margin-top: 10px; }
+.term-nav-link {
+    color: #aaa; margin: 0 10px; font-size: 0.9rem;
+    display: inline-flex; align-items: center; line-height: 1;
+}
+.term-nav-link:hover { color: #fff; text-decoration: underline; }
+.term-nav-link.active { font-weight: bold; color: #fff; text-decoration: underline; }
+.term-separator { color: #666; }
+
+.search-container {
+    margin-top: 20px; max-width: 400px;
+    margin-left: auto; margin-right: auto;
+}
+#termSearch {
+    background: #1e1e1e; border: 1px solid #555; color: #fff;
+    font-size: 1.1rem; padding: 15px; border-radius: 30px;
+    text-align: center; width: 100%;
+}
+#termSearch:focus { border-color: #8ab4f8; outline: none; }
+.no-results-msg { display: none; text-align: center; color: #888; margin-top: 20px; }
+
+.terms-grid { display: flex; flex-wrap: wrap; justify-content: center; padding: 20px 0; }
+.btn-term {
+    background: #1e1e1e; border: 1px solid #555;
+    padding: 15px 25px; border-radius: 30px;
+    font-size: 1.2rem; color: #fff;
+    display: flex; align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3); margin: 8px;
+}
+.term-count {
+    background: #333; font-size: 0.8rem; margin-left: 10px;
+    padding: 2px 8px; border-radius: 10px; color: #ddd; border: 1px solid #666;
+}
+
+/* Pagination 
+*/
+.pagination { 
+    display: flex; 
+    align-items: center; 
+    padding: 40px 0; 
+    justify-content: space-between;
+}
+
+.pagination-col { 
+    flex: 1; 
+    display: flex; 
+    align-items: center; 
+    min-height: 1px; 
+}
+
+.pagination-left { justify-content: flex-start; }
+.pagination-right { justify-content: flex-end; }
+
+/* Manual spacing for iOS 9 */
+.pagination-col .btn-page + .btn-page { margin-left: 5px; }
+
+.btn-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    background: #2a2a2a; color: #fff;
+    text-decoration: none; border-radius: 4px;
+    border: 1px solid #444;
+    padding: 0; margin: 0;
+    font-size: 0; line-height: 0;
+}
+
+.btn-page:hover { background: #3a3a3a; border-color: #666; }
+
+.btn-page .btn-icon {
+    width: 18px; height: 18px;
+    display: block; margin: 0 auto;
+}
+
+/* Jump Box */
+.pagination-jump {
+    display: flex; align-items: center; justify-content: center;
+    color: #888; font-size: 0.8rem;
+}
+.jump-text { margin: 0 8px; white-space: nowrap; }
+
+.jump-input {
+    background: #1e1e1e; border: 1px solid #444; color: #fff;
+    border-radius: 4px; width: 38px; height: 32px;
+    text-align: center; padding: 0; font-size: 14px;
+    -webkit-appearance: none;
+    -moz-appearance: textfield; 
+}
+
+/* Remove arrows on Webkit */
+.jump-input::-webkit-outer-spin-button,
+.jump-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.jump-input:focus { border-color: #0066cc; outline: none; }
+
+/* Responsive & Print 
+*/
+@media (max-width: 600px) {
+    .recipe-card { width: 100%; }
+    .recipe-detail { padding: 15px; }
+}
+
+@media print {
+    /* Hiding navigation to save paper */
+    .source-container, .term-nav-wrapper, .edit-form { display: none !important; }
+    
+    .recipe-detail, .content-wrapper {
+        background: #fff !important; color: #000 !important; margin: 0 !important;
+        padding: 0 !important; width: 100% !important; max-width: 100% !important; border: none !important;
+    }
+    .recipe-title { color: #000 !important; font-size: 24pt; }
+    h2 { color: #000 !important; border-bottom: 1px solid #000; }
+    a { text-decoration: none !important; color: #000 !important; }
+    .content-wrapper ul { border: none !important; }
+    .content-wrapper ul li {
+        border-bottom: 1px solid #ccc !important; background-color: transparent !important; color: #000 !important;
+    }
+}

@@ -1,0 +1,11 @@
+recipes/*
+!recipes/.gitkeep
+src/site/public/
+src/site/resources/
+.hugo_build.lock
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+.env
+venv/

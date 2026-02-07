@@ -1,0 +1,104 @@
+{{ define "main" }}
+<div class="container form-container">
+
+    <div class="recipe-detail form-card section-single">
+        <h1>Import Single Recipe</h1>
+        <p class="form-desc">
+            Paste a URL to review and edit before saving.
+        </p>
+
+        <form action="/stage" method="post">
+            <div class="form-group">
+                <input type="url" name="url" placeholder="https://www.allrecipes.com/..." class="form-input" required>
+            </div>
+            
+            <button type="submit" class="btn-submit btn-full">
+                Review & Import
+                <svg class="btn-icon btn-icon-right" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                    <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <div class="recipe-detail form-card section-bulk">
+        <h1>Manual Entry</h1>
+        <p class="form-desc">
+            Create a blank recipe from scratch.
+        </p>
+
+        <form action="/edit" method="post">
+            <input type="hidden" name="slug" value="">
+            
+            <button type="submit" class="btn-submit btn-full">
+                Create Blank Recipe
+                <svg class="btn-icon btn-icon-right" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <div class="recipe-detail form-card section-bulk">
+        <h1>Bulk Import</h1>
+        <p class="form-desc">
+            Paste a list of URLs (one per line).
+        </p>
+
+        <form action="/bulk" method="post" onsubmit="return validateBatch(this)">
+            <div class="form-group">
+                <textarea name="urls" class="form-input form-textarea is-placeholder"
+                    data-default="https://www.allrecipes.com/recipe/1&#10;https://www.foodnetwork.com/recipe/2&#10;https://www.seriouseats.com/recipe/3"
+                    onfocus="handleFocus(this)" onblur="handleBlur(this)">https://www.allrecipes.com/recipe/1
+https://www.foodnetwork.com/recipe/2
+https://www.seriouseats.com/recipe/3</textarea>
+            </div>
+
+            <button type="submit" class="btn-submit btn-full">
+                Run Batch Job
+                <svg class="btn-icon btn-icon-right" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    // --- Helper: Simulate placeholder behavior for multiline textareas ---
+    function handleFocus(el) {
+        var def = el.getAttribute('data-default');
+        // If the content is exactly the "fake placeholder", clear it
+        if (el.value === def) {
+            el.value = "";
+            el.classList.remove('is-placeholder');
+        }
+    }
+
+    function handleBlur(el) {
+        var def = el.getAttribute('data-default');
+        // If the user left it empty, restore the "fake placeholder"
+        if (el.value.trim() === "") {
+            el.value = def;
+            el.classList.add('is-placeholder');
+        }
+    }
+
+    /* * Validate Batch
+     * If the user tries to submit the placeholder text or an empty box,
+     * we silently ignore the click. This prevents the "redirect to 8080" bug.
+     */
+    function validateBatch(form) {
+        var area = form.querySelector('textarea');
+        var val = area.value;
+        var def = area.getAttribute('data-default');
+        
+        if (val === def || val.trim() === "") {
+            return false;
+        }
+        return true;
+    }
+</script>
+{{ end }}

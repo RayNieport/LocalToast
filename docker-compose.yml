@@ -1,0 +1,16 @@
+services:
+  localtoast:
+    build: ./src
+    container_name: localtoast
+    restart: unless-stopped
+    
+    ports:
+      - "8001:8080"
+    
+    volumes:
+      - ./recipes:/app/site/content/recipes
+
+    environment:
+      # Set UPDATE_SCRAPERS=true and restart to force an update of the scraper library.
+      - UPDATE_SCRAPERS=false
+      - TZ=America/New_York

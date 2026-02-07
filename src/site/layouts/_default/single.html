@@ -1,0 +1,172 @@
+{{ define "main" }}
+<article class="recipe-detail">
+
+    <div class="recipe-header">
+        <h1 class="recipe-title">{{ .Title }}</h1>
+
+        <div class="recipe-meta">
+            <span>{{ .Date.Format "Jan 2, 2006" }}</span>
+
+            <span class="meta-separator" id="wakeLockSeparator" style="display:none">&bull;</span>
+            
+            <label class="wake-lock-label" id="wakeLockContainer">
+                <input type="checkbox" id="wakeLockCheckbox" onchange="toggleWakeLock(this)">
+                <span>Keep Screen On</span>
+            </label>
+        </div>
+
+        <div class="tag-cloud">
+            {{ range .GetTerms "tags" }}
+            <a href="{{ .RelPermalink }}" class="tag-pill">#{{ .LinkTitle }}</a>
+            {{ end }}
+        </div>
+
+        {{/* Image Logic: Prioritize WebP, fallback to JPG */}}
+        {{ $jpg := .Resources.GetMatch "cover.jpg" }}
+        {{ $webp := .Resources.GetMatch "cover.webp" }}
+
+        {{ if $jpg }}
+        <picture>
+            {{ with $webp }}
+            <source srcset="{{ .RelPermalink }}" type="image/webp">
+            {{ end }}
+            <img 
+                src="{{ $jpg.RelPermalink }}" 
+                alt="{{ $.Title }}" 
+                class="recipe-image" 
+                width="800" height="600">
+        </picture>
+        {{ end }}
+    </div>
+
+    <div class="content-wrapper" id="recipeContent">
+        {{ .Content }}
+    </div>
+
+    <div class="source-container">
+        <button type="button" class="btn-action btn-edit" onclick="copyRecipe(this)">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" /></svg>
+            <span class="btn-text">Copy Text</span>
+        </button>
+
+        <form action="/edit" method="post" class="edit-form">
+            <input type="hidden" name="slug" value="{{ .File.ContentBaseName }}">
+            <button type="submit" class="btn-action btn-edit">
+                <svg class="btn-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>
+                Edit
+            </button>
+        </form>
+
+        {{ if .Params.source_url }}
+        <a href="{{ .Params.source_url }}" target="_blank" rel="noopener noreferrer" class="btn-action">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" /></svg>
+            Source
+        </a>
+        {{ end }}
+    </div>
+
+</article>
+
+<script>
+    /*
+     * Wake Lock API (Screen Keep-Alive)
+     * Using Promises for iOS 9/ES5 safety.
+     */
+    var wakeLock = null;
+
+    (function initWakeLockUI() {
+        if ('wakeLock' in navigator) {
+            var container = document.getElementById('wakeLockContainer');
+            var separator = document.getElementById('wakeLockSeparator');
+            if (container) container.style.display = 'inline-flex';
+            if (separator) separator.style.display = 'inline';
+        }
+    })();
+
+    function toggleWakeLock(checkbox) {
+        if (!('wakeLock' in navigator)) return;
+
+        if (checkbox.checked) {
+            navigator.wakeLock.request('screen')
+                .then(function(lock) {
+                    wakeLock = lock;
+                    wakeLock.addEventListener('release', function() {
+                        checkbox.checked = false;
+                        wakeLock = null;
+                    });
+                })
+                .catch(function(err) {
+                    console.error("Wake Lock failed:", err);
+                    checkbox.checked = false;
+                });
+        } else {
+            if (wakeLock !== null) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+    }
+
+    document.addEventListener('visibilitychange', function() {
+        var box = document.getElementById('wakeLockCheckbox');
+        if (wakeLock === null && document.visibilityState === 'visible' && box && box.checked) {
+            toggleWakeLock(box);
+        }
+    });
+
+    /*
+     * Copy Recipe Handler
+     * Extracts Title + Ingredients/Instructions + URL and copies to clipboard.
+     */
+    function copyRecipe(btn) {
+        // 1. Construct the text blob
+        var title = document.querySelector('.recipe-title').innerText;
+        var content = document.getElementById('recipeContent').innerText;
+        var url = window.location.href;
+        
+        var fullText = title + "\n\n" + content + "\n\nSource: " + url;
+
+        var label = btn.querySelector('.btn-text');
+        var originalLabel = label.innerText;
+
+        function showSuccess() {
+            label.innerText = "Copied!";
+            btn.classList.add('btn-success');
+            setTimeout(function() {
+                label.innerText = originalLabel;
+                btn.classList.remove('btn-success');
+            }, 2000);
+        }
+
+        // 2. Modern Copy (Async)
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(fullText).then(showSuccess).catch(function(err) {
+                console.error('Copy failed', err);
+            });
+        } 
+        // 3. Legacy Copy (iOS 9 / execCommand)
+        else {
+            var textArea = document.createElement("textarea");
+            textArea.value = fullText;
+            
+            // Ensure element is not visible but part of DOM
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            textArea.style.top = "0";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                var successful = document.execCommand('copy');
+                if (successful) showSuccess();
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+
+            document.body.removeChild(textArea);
+        }
+    }
+</script>
+{{ end }}

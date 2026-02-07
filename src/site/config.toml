@@ -1,0 +1,17 @@
+baseURL = '/' 
+relativeURLs = true
+languageCode = 'en-us'
+title = 'LocalToast'
+
+[pagination]
+  pagerSize = 10
+  
+[minify]
+  disableXML = true
+  minifyOutput = true
+
+[taxonomies]
+  tag = "tags"
+
+[params]
+  description = "A collection of recipes optimized for simple, distraction-free cooking."

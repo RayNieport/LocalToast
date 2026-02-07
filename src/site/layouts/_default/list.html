@@ -1,0 +1,122 @@
+{{ define "main" }}
+<div class="recipe-header">
+    <h1>{{ .Title }}</h1>
+    
+    {{/* Show a "Back to All Tags" button if we are deep inside a specific tag */}}
+    {{ if and (ne .RelPermalink "/tags/") (eq .Section "tags") }}
+    <div class="term-nav-wrapper">
+        <a href="/tags/" class="term-nav-link">
+            <svg class="btn-icon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+            All Tags
+        </a>
+    </div>
+    {{ end }}
+</div>
+
+<div class="recipe-grid">
+    {{ range .Paginator.Pages }}
+    <article class="recipe-card">
+        <a href="{{ .RelPermalink }}">
+            {{ $small_jpg := .Resources.GetMatch "cover_small.jpg" }}
+            {{ $small_webp := .Resources.GetMatch "cover_small.webp" }}
+            {{ $master_jpg := .Resources.GetMatch "cover.jpg" }}
+            {{ $master_webp := .Resources.GetMatch "cover.webp" }}
+
+            {{ $jpg := or $small_jpg $master_jpg }}
+            {{ $webp := or $small_webp $master_webp }}
+
+            <div class="aspect-ratio-box">
+                {{ if $jpg }}
+                <picture>
+                    {{ if $webp }}
+                    <source srcset="{{ $webp.RelPermalink }}" type="image/webp">
+                    {{ end }}
+                    <img 
+                        src="{{ $jpg.RelPermalink }}" 
+                        alt="{{ .Title }}" 
+                        class="aspect-ratio-img"
+                        width="800" height="600"
+                        loading="lazy">
+                </picture>
+                {{ else }}
+                    {{ end }}
+            </div>
+            
+            <h2>{{ .Title }}</h2>
+        </a>
+    </article>
+    {{ end }}
+</div>
+
+{{ if gt .Paginator.TotalPages 1 }}
+<div class="pagination">
+    
+    <div class="pagination-col pagination-left">
+        {{ if ne .Paginator.PageNumber 1 }}
+        <a href="{{ .Paginator.First.URL }}" class="btn-page" aria-label="First Page">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M18.41,16.59L13.82,12L18.41,7.41L17,6L11,12L17,18L18.41,16.59M6,6H8V18H6V6Z" /></svg>
+        </a>
+        {{ end }}
+
+        {{ if .Paginator.HasPrev }}
+        <a href="{{ .Paginator.Prev.URL }}" class="btn-page" aria-label="Previous Page">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" /></svg>
+        </a>
+        {{ end }}
+    </div>
+
+    <form class="pagination-jump" onsubmit="jumpToPage(event, {{ .Paginator.TotalPages }})">
+        <span class="jump-text">Page</span>
+        <input type="number" id="pageJumpInput" 
+               class="jump-input" 
+               value="{{ .Paginator.PageNumber }}" 
+               min="1" max="{{ .Paginator.TotalPages }}">
+        <span class="jump-text">of {{ .Paginator.TotalPages }}</span>
+        <button type="submit" style="display:none;">Go</button>
+    </form>
+
+    <div class="pagination-col pagination-right">
+        {{ if .Paginator.HasNext }}
+        <a href="{{ .Paginator.Next.URL }}" class="btn-page" aria-label="Next Page">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>
+        </a>
+        {{ end }}
+
+        {{ if ne .Paginator.PageNumber .Paginator.TotalPages }}
+        <a href="{{ .Paginator.Last.URL }}" class="btn-page" aria-label="Last Page">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M5.59,7.41L10.18,12L5.59,16.59L7,18L13,12L7,6L5.59,7.41M16,6H18V18H16V6Z" /></svg>
+        </a>
+        {{ end }}
+    </div>
+
+</div>
+
+<script>
+/*
+ * Handles pagination jump box.
+ * Parses current URL to maintain directory structure (e.g. /tags/dinner/page/2/)
+ */
+function jumpToPage(e, totalPages) {
+    e.preventDefault();
+    var input = document.getElementById('pageJumpInput');
+    var pageNum = parseInt(input.value);
+
+    if (isNaN(pageNum) || pageNum < 1) pageNum = 1;
+    if (pageNum > totalPages) pageNum = totalPages;
+
+    var currentPath = window.location.pathname;
+    // Strip trailing slash for consistency
+    if(currentPath.endsWith('/')) currentPath = currentPath.slice(0, -1);
+    
+    // Remove existing pagination segments
+    var cleanPath = currentPath.replace(/\/page\/\d+$/, '');
+
+    if (pageNum === 1) {
+        window.location.href = cleanPath + "/";
+    } else {
+        window.location.href = cleanPath + "/page/" + pageNum + "/";
+    }
+}
+</script>
+{{ end }}
+{{ end }}

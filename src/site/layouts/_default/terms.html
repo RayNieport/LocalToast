@@ -1,0 +1,66 @@
+{{ define "main" }}
+<div class="container">
+    <div class="recipe-header">
+        <h1>Browse Tags</h1>
+        
+        <div class="search-container">
+            <input type="text" id="termSearch" 
+                   class="form-input" 
+                   placeholder="Filter tags..." 
+                   autocomplete="off"
+                   onkeyup="filterTerms()">
+        </div>
+    </div>
+
+    <div class="terms-grid" id="termsContainer">
+        {{ range .Data.Terms.Alphabetical }}
+        <a href="{{ .Page.RelPermalink }}" class="btn-term" data-name="{{ .Page.Title | lower }}">
+            <span style="font-weight: bold;">{{ .Page.Title }}</span>
+            <span class="term-count">{{ .Count }}</span>
+        </a>
+        {{ end }}
+    </div>
+    
+    <div id="noResults" class="no-results-msg">
+        No matches found.
+    </div>
+</div>
+
+<script>
+/*
+ * Client-Side Filter
+ * Simple text matching to hide/show tags instantly without reloading.
+ */
+function filterTerms() {
+    var input = document.getElementById('termSearch');
+    var filter = input.value.toLowerCase().trim();
+    var container = document.getElementById('termsContainer');
+    
+    // We use getElementsByClassName for slightly better performance 
+    // on older engines compared to querySelectorAll
+    var buttons = container.getElementsByClassName('btn-term');
+    var visibleCount = 0;
+    var noRes = document.getElementById('noResults');
+
+    for (var i = 0; i < buttons.length; i++) {
+        var button = buttons[i];
+        var name = button.getAttribute('data-name');
+        
+        // Simple substring match
+        if (name.indexOf(filter) > -1) {
+            button.style.display = ""; // Reset to default (flex/block)
+            visibleCount++;
+        } else {
+            button.style.display = "none";
+        }
+    }
+    
+    // Toggle the "No Results" message
+    if (visibleCount === 0) {
+        noRes.style.display = "block";
+    } else {
+        noRes.style.display = "none";
+    }
+}
+</script>
+{{ end }}
