@@ -235,6 +235,18 @@ def process_and_save_recipe(data, original_slug=None):
         if not original_img:
             original_img = download_image_with_fallback(data.get('image_url'), data.get('source_url'))
 
+        # If we didn't upload/download a NEW image, but we are moving folders (renaming),
+        # we must copy the old images to the new folder.
+        if not original_img and original_slug and original_slug != slug:
+            old_dir = os.path.join(CONTENT_DIR, original_slug)
+            if os.path.exists(old_dir):
+                # Look for cover.jpg, cover.webp, cover_small.jpg, etc.
+                for img_file in glob.glob(os.path.join(old_dir, "cover*.*")):
+                    try:
+                        shutil.copy2(img_file, recipe_path)
+                    except Exception as e:
+                        print(f"Warning: Failed to copy image {img_file}: {e}")
+
         # Fallback to default if no image found/uploaded
         img_filename_jpg = "cover.jpg" if original_img else (data.get('existing_image') or "")
         if not img_filename_jpg and not original_img:
