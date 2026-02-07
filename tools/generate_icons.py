@@ -23,9 +23,14 @@ def generate_favicons():
     if apple_source.exists():
         try:
             img = Image.open(apple_source)
-            # 180x180 is the standard high-res iOS size
+            # Apple
             img.resize((180, 180), Image.Resampling.LANCZOS).save(output_dir / "apple-touch-icon.png")
-            print(" - Created apple-touch-icon.png")
+            
+            # Android Chrome (Standard Sizes)
+            img.resize((192, 192), Image.Resampling.LANCZOS).save(output_dir / "android-chrome-192x192.png")
+            img.resize((512, 512), Image.Resampling.LANCZOS).save(output_dir / "android-chrome-512x512.png")
+            
+            print(" - Created apple-touch-icon and android-chrome icons")
         except Exception as e:
             print(f"Error processing Apple icon: {e}")
     else:
