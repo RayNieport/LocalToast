@@ -48,7 +48,7 @@ Copy this into a folder on your server (e.g., `~/localtoast`):
 ```yaml
 services:
   localtoast:
-    image: ghcr.io/RayNieport/localtoast:latest
+    image: ghcr.io/raynieport/localtoast:latest
     container_name: localtoast
     restart: unless-stopped
     ports:
