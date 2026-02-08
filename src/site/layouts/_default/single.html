@@ -171,12 +171,14 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         if (window.location.hostname.includes('github.io')) {
-            
-            var editBtn = document.querySelector('.btn-action');
-            if (editBtn) {
-                var pathParts = window.location.pathname.split('/recipes/');
-                var rootPath = pathParts[0];
-                editBtn.href = rootPath + "/add/editor.html";
+            var editBtn = document.querySelector('.btn-edit');
+                if (editBtn) {
+                editBtn.addEventListener('click', function(e) {
+                    e.preventDefault(); 
+                    var pathParts = window.location.pathname.split('/recipes/');
+                    var rootPath = pathParts[0];
+                    window.location.href = rootPath + "/add/editor.html";
+                });
             }
         }
     });
