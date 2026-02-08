@@ -1,0 +1,303 @@
+/* Editor & Form Layouts 
+   Styles for the recipe editor, bulk importer, and interactive badges.
+*/
+
+.form-container { max-width: 600px; margin-top: 40px; }
+.form-card { padding: 20px; text-align: center; }
+.form-desc { color: #ccc; margin-bottom: 20px; }
+.section-single { margin-bottom: 30px; }
+.section-bulk { border-top: 4px solid #333; }
+
+/* Form Elements */
+.form-group { margin-bottom: 15px; text-align: left; position: relative; } 
+.form-label { display: block; margin-bottom: 5px; font-weight: bold; color: #fff; font-size: 0.9rem; }
+
+.form-input {
+    background: #2a2a2a; border: 1px solid #666; color: #fff;
+    padding: 12px; border-radius: 4px; width: 100%; font-size: 16px;
+}
+.form-input:focus { outline: none; border-color: #0066cc; }
+
+.form-textarea { min-height: 200px; white-space: pre; color: #fff; }
+.form-textarea-large { min-height: 350px; }
+.is-placeholder { color: #888 !important; }
+
+/* Consistency for placeholders */
+textarea::-webkit-input-placeholder { white-space: pre-wrap; position: relative; display: block; line-height: 1.5; color: #666; }
+textarea::placeholder { white-space: pre-wrap; line-height: 1.5; color: #666; }
+
+/* Error Banner (JS toggled) */
+#error-banner {
+    display: none; 
+    background-color: #ffebee; 
+    color: #c62828; 
+    padding: 10px; 
+    margin-bottom: 15px; 
+    border: 1px solid #c62828; 
+    border-radius: 4px;
+}
+
+/* Two-column layout for editor */
+.editor-container { max-width: 800px; padding-top: 20px; }
+.split-row { display: flex; }
+.split-col { flex: 1; }
+.split-col:first-child { margin-right: 20px; }
+
+/* Image Preview Box */
+.preview-box {
+    margin-top: 10px; padding: 10px;
+    background: #1e1e1e; border: 1px solid #333;
+    display: inline-block; border-radius: 4px;
+}
+.preview-img { max-height: 200px; width: auto; display: block; }
+
+.editor-actions { display: flex; margin-top: 30px; }
+.editor-actions > * { margin-right: 15px; }
+.editor-actions > *:last-child { margin-right: 0; }
+
+.form-file-input {
+    background: #2a2a2a; color: #fff; padding: 10px;
+    border: 1px solid #666; border-radius: 4px; width: 100%; font-size: 0.9rem; cursor: pointer;
+}
+
+/* Input Status (Valid/Invalid/Checking) */
+.input-status-msg { font-size: 0.85rem; margin-top: 5px; display: none; font-weight: bold; }
+.status-checking { color: #ffd700; display: block; }
+.status-ok { color: #4caf50; display: block; }
+.status-fail { color: #ff5252; display: block; }
+
+/* Helper Classes */
+.or-separator { margin-top: 10px; text-align: center; color: #888; }
+.label-with-spacing { margin-top: 10px; }
+.preview-caption { color: #aaa; display: block; margin-bottom: 5px; }
+.preview-placeholder-text { padding: 20px; color: #fff; font-style: italic; }
+.form-group-spaced { margin-top: 20px; }
+.is-hidden { display: none; }
+.help-text { color: #888; font-size: 0.85rem; font-weight: normal; }
+
+/* Destructive Actions */
+.btn-delete {
+    background-color: #d32f2f; color: white; border: 1px solid #b71c1c;
+    margin-top: 40px;
+}
+.btn-delete:hover { background-color: #b71c1c; }
+.delete-section { margin-top: 60px; padding-top: 30px; border-top: 1px solid #333; text-align: center; }
+
+/* Autocomplete & Tags 
+   Badges overlaid inside the input field.
+*/
+.autocomplete-wrapper, 
+.input-wrapper { 
+    position: relative; 
+    width: 100%; 
+}
+
+.status-badge {
+    position: absolute; 
+    right: 12px; 
+    top: 50%; 
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+    
+    font-size: 0.75rem; 
+    font-weight: bold; 
+    padding: 4px 8px; 
+    border-radius: 4px; 
+    pointer-events: none;
+    z-index: 10;
+    line-height: 1;
+}
+
+.status-match { 
+    background: #1b3a1b !important; 
+    color: #4caf50 !important; 
+    border: 1px solid #2e5c2e !important; 
+}
+.status-new { 
+    background: #3a2e1b !important; 
+    color: #ff9800 !important; 
+    border: 1px solid #5c482e !important; 
+}
+.status-taken { 
+    background: #5c2e2e !important; 
+    color: #ff5252 !important; 
+    border: 1px solid #7f3a3a !important; 
+}
+
+.suggestions-list {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: #1e1e1e; border: 1px solid #444; border-top: none;
+    border-radius: 0 0 4px 4px; max-height: 200px; overflow-y: auto;
+    z-index: 1000; display: none; list-style: none; padding: 0; margin: 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+}
+.suggestions-list.visible { display: block; }
+
+.suggestion-item {
+    padding: 10px 12px; cursor: pointer;
+    border-bottom: 1px solid #2a2a2a; font-size: 0.95rem; color: #ddd;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.suggestion-item:hover { background: #0066cc; color: #fff; }
+
+.suggestion-count {
+    font-size: 0.85em; color: #888; background: #eee;
+    padding: 2px 6px; border-radius: 10px; margin-left: 10px;
+}
+.suggestion-item:hover .suggestion-count {
+    background: rgba(255,255,255,0.3); color: #fff;
+}
+
+/* Modals 
+   Simple overlay for delete confirmation.
+*/
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 10000; display: none;
+}
+.modal-box {
+    background: #1e1e1e; padding: 30px; border-radius: 8px; border: 1px solid #555;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.7); text-align: center;
+    position: fixed; top: 20%; left: 5%; width: 90%; max-width: 400px;
+    margin-left: auto; margin-right: auto; right: 5%;
+}
+.modal-title { color: #ff5252; font-size: 1.5rem; margin-bottom: 15px; }
+.modal-text { color: #ccc; margin-bottom: 30px; line-height: 1.5; }
+.modal-actions { text-align: center; }
+.btn-danger-confirm, .btn-modal-cancel { display: inline-block; width: 45%; margin: 0 2%; }
+.btn-danger-confirm { background-color: #d32f2f; color: white; border: none; }
+.btn-danger-confirm:hover { background-color: #b71c1c; }
+.btn-modal-cancel { background-color: #333; color: #fff; border: 1px solid #555; }
+.btn-modal-cancel:hover { background-color: #444; }
+
+@media (max-width: 600px) {
+    .split-row { flex-direction: column; }
+    .split-col:first-child { margin-right: 0; margin-bottom: 20px; }
+}
+
+/* Bulk Import UI 
+   Legacy Note: We use margins instead of 'gap' for iOS 9 support.
+*/
+.bulk-grid { 
+    display: flex; 
+    flex-direction: column; 
+    margin-bottom: 120px; /* Space for sticky footer */
+    border: 1px solid #333;
+    border-radius: 4px;
+    overflow: hidden; 
+}
+
+.bulk-card { 
+    background: #1e1e1e; 
+    padding: 20px; 
+    display: flex; 
+    align-items: flex-start; 
+    border-bottom: 1px solid #333;
+}
+.bulk-card:nth-child(even) { background-color: #252525; }
+.bulk-card:last-child { border-bottom: none; }
+
+.bulk-status { 
+    margin-right: 20px; 
+    padding-top: 4px; 
+    flex-shrink: 0;
+}
+.icon-success { color: #4caf50; }
+.icon-failure { color: #f44336; }
+.icon-warning { fill: #f59e0b; }
+
+.bulk-content { 
+    flex: 1; 
+    min-width: 0; 
+}
+
+.result-main {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+/* Flex container for the edit fields */
+.bulk-row { 
+    display: flex; 
+    width: 100%;
+}
+/* Manual gap replacement */
+.bulk-row > * { margin-right: 20px; }
+.bulk-row > *:last-child { margin-right: 0; }
+
+.bulk-col-full { width: 100%; position: relative; }
+
+.mini-label { 
+    font-size: 0.75rem; 
+    text-transform: uppercase; 
+    color: #aaa; 
+    margin-bottom: 6px; 
+    display: block; 
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.mini-input { 
+    width: 100%; 
+    background: #121212; 
+    border: 1px solid #555; 
+    color: #fff; 
+    padding: 10px; 
+    border-radius: 4px; 
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+.mini-input:focus { 
+    border-color: #0066cc; 
+    outline: none; 
+    background: #000;
+}
+
+.status-error-msg {
+    color: #ff8a80;
+    font-size: 0.9rem;
+    background: rgba(255, 0, 0, 0.1);
+    padding: 8px 12px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 5px; 
+}
+
+/* Sticky Footer for Bulk Actions */
+.sticky-footer {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: #181818; border-top: 1px solid #444;
+    padding: 20px; text-align: center;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.7);
+    z-index: 100;
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: center;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.footer-form {
+    flex: 1;
+    margin-right: 20px; /* Spacing between cancel and import */
+}
+
+.btn-confirm { 
+    flex: 1; 
+    margin: 0;
+    font-size: 1rem; height: 44px;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+@media (max-width: 600px) {
+    .bulk-row { flex-direction: column; }
+    /* Reset horizontal margins and add vertical spacing */
+    .bulk-row > * { margin-right: 0; margin-bottom: 10px; }
+    .bulk-row > *:last-child { margin-bottom: 0; }
+}

@@ -1,0 +1,212 @@
+/* Base Reset & Typography
+   Standardizing defaults so the site looks consistent on modern Chrome and iOS 9 Safari.
+*/
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    /* Prevents font scaling weirdness on rotating iOS devices */
+    -webkit-text-size-adjust: 100%;
+}
+
+input, textarea, button, select {
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s;
+}
+a:hover { opacity: 0.8; }
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    /* Slight dim to reduce eye strain in dark mode */
+    opacity: 0.95;
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 10px;
+    min-height: 100vh;
+}
+
+/* Header & Navigation 
+   Simple flex row for the top bar.
+*/
+.site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 2px solid #444;
+    margin-bottom: 30px;
+}
+
+.site-title {
+    margin: 0;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    color: #fff;
+}
+
+.brand-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.brand-logo {
+    margin-right: 12px;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+}
+/* Manual spacing since we can't use gap */
+.nav-links > * { margin-left: 15px; }
+.nav-links > *:first-child { margin-left: 0; }
+
+.nav-link-text {
+    color: #e0e0e0;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.site-footer {
+    text-align: center;
+    padding: 40px 0;
+    color: #aaa;
+    font-size: 0.8rem;
+    border-top: 1px solid #333;
+    margin-top: 40px;
+}
+
+/* Button System
+   Unified styles for all clickable elements to ensure large touch targets.
+*/
+.btn-nav, .btn-action, .btn-submit, .btn-cancel, .btn-page, .btn-save-primary {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 44px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    box-sizing: border-box;
+    white-space: nowrap;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+/* Flex Buttons: For inline nav items */
+.btn-nav, .btn-action, .btn-cancel, .btn-page {
+    display: -webkit-inline-flex;
+    display: inline-flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    padding: 0 16px;
+    line-height: 1;
+}
+
+/* Block Buttons: Full width for mobile-friendly forms */
+.btn-submit, .btn-full, .btn-save-primary {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 0;
+    line-height: 42px;
+}
+
+/* --- Color Variants --- */
+
+/* Standard Nav / Pagination */
+.btn-nav, .btn-page {
+    background: #333; 
+    color: #fff; 
+    border-color: #666;
+}
+.btn-nav {
+    padding: 0 12px; 
+    height: 36px;
+}
+.btn-page:hover, .btn-nav:hover { background: #444; }
+
+/* Secondary Actions (Edit/Source) */
+.btn-action, .btn-edit { 
+    background: #222; 
+    color: #ddd; 
+}
+.btn-action:hover { background: #333; }
+
+/* Cancel / Destructive */
+.btn-cancel { 
+    background: #333; 
+    color: #fff; 
+}
+.btn-cancel:hover { background: #444; }
+
+/* Primary Action */
+.btn-submit, .btn-save-primary {
+    background-color: #0066cc; 
+    color: white; 
+    border: none;
+    font-size: 1.1rem;
+}
+.btn-submit:hover, .btn-save-primary:hover { 
+    background-color: #005bb5; 
+}
+
+/* JS Toggled Success State */
+.btn-success {
+    color: #4caf50 !important; 
+    border-color: #4caf50 !important;
+    background: transparent !important;
+}
+
+/* Icons */
+.btn-icon {
+    width: 14px; height: 14px;
+    fill: currentColor;
+    display: block;
+    margin-right: 8px;
+}
+.btn-icon-right { 
+    margin-left: 8px; 
+    margin-right: 0; 
+}
+
+/* Fix vertical alignment for icons in block buttons */
+.btn-submit .btn-icon, .btn-full .btn-icon, .btn-save-primary .btn-icon {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -3px;
+}
+
+/* Print Overrides: Save ink */
+@media print {
+    .site-header, .site-footer, .nav-links, .btn-action, .pagination, .edit-form { display: none !important; }
+    body { background: #fff !important; color: #000 !important; }
+    .container { max-width: 100%; margin: 0; padding: 0; }
+}

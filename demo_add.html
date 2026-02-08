@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Recipe | LocalToast</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/editor.css">
+    
+    <style>
+        /* --- DEMO TOAST STYLES --- */
+        #demo-toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #2a2a2a;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 16px;
+            position: fixed;
+            z-index: 9999;
+            left: 50%;
+            bottom: 30px;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+            border-left: 4px solid #0db7ed;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        #demo-toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="site-header">
+            <h1 class="site-title">
+                <a href="../" class="brand-link">
+                    <img src="../logo.png" alt="" class="brand-logo" width="32" height="32">
+                    <span>LocalToast</span>
+                </a>
+            </h1>
+            <nav class="nav-links">
+                <a href="../tags/" class="nav-link-text">Browse</a>
+                <a href="./" class="btn-nav">+ Add</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="container form-container">
+                
+                <div class="error-banner" style="display:block; margin-bottom: 20px; background-color: #2a2a2a; border-left: 4px solid #0db7ed;">
+                    <strong>ℹ️ Demo Mode:</strong> Backend services are offline.<br>
+                    <small>We've simulated the "Add" experience below.</small>
+                </div>
+
+                <div class="recipe-detail form-card section-single">
+                    <h1>Import Single Recipe</h1>
+                    <p class="form-desc">Paste a URL to review and edit before saving.</p>
+                    
+                    <form onsubmit="window.location.href='../add/editor.html'; return false;">
+                        <div class="form-group">
+                            <input type="url" placeholder="https://www.allrecipes.com/..." class="form-input" required>
+                        </div>
+                        <button type="submit" class="btn-submit btn-full">
+                            Review & Import (Demo)
+                        </button>
+                    </form>
+                </div>
+
+                <div class="recipe-detail form-card section-bulk">
+                    <h1>Manual Entry</h1>
+                    <p class="form-desc">Create a blank recipe from scratch.</p>
+
+                    <form onsubmit="window.location.href='../add/editor.html'; return false;">
+                        <button type="submit" class="btn-submit btn-full">
+                            Create Blank Recipe (Demo)
+                        </button>
+                    </form>
+                </div>
+
+                <div class="recipe-detail form-card section-bulk" style="opacity: 0.6;">
+                    <h1>Bulk Import</h1>
+                    <p class="form-desc">Paste a list of URLs (one per line).</p>
+
+                    <form onsubmit="showToast('🚫 Bulk Import requires the Python backend.'); return false;">
+                        <div class="form-group">
+                            <textarea class="form-input form-textarea" disabled>Bulk import unavailable in demo mode.</textarea>
+                        </div>
+                        <button type="submit" class="btn-submit btn-full" style="cursor: not-allowed;">
+                            Run Batch Job
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <footer class="site-footer">
+            Served hot by LocalToast 🍞 (Demo)
+        </footer>
+    </div>
+
+    <div id="demo-toast"></div>
+
+    <script>
+        function showToast(message) {
+            var x = document.getElementById("demo-toast");
+            x.textContent = message;
+            x.className = "show";
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        }
+    </script>
+</body>
+</html>
