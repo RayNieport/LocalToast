@@ -17,12 +17,17 @@ jobs:
           hugo-version: '0.152.2'
           extended: true
 
+      - name: Inject Recipe Content
+        run: |
+          mkdir -p src/site/content/recipes
+          cp -r recipes/* src/site/content/recipes/
+
       - name: Build
-        working-directory: ./site
+        working-directory: ./src/site
         run: hugo --minify --baseURL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
 
       - name: Install Mock Pages
-        working-directory: ./site
+        working-directory: ./src/site
         run: |
           mkdir -p public/add
           cp static/demo_add.html public/add/index.html
@@ -32,4 +37,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site/public
+          publish_dir: ./src/site/public

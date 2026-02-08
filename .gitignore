@@ -1,5 +1,5 @@
 recipes/*
-!recipes/.gitkeep
+!recipes/welcome-to-localtoast/
 src/site/public/
 src/site/resources/
 .hugo_build.lock
