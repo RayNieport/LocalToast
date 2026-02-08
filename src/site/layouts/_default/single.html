@@ -168,5 +168,15 @@
             document.body.removeChild(textArea);
         }
     }
+
+    (function() {
+        if (window.location.hostname.indexOf('github.io') > -1) {
+            var editBtn = document.querySelector('a[href^="/edit/"]');
+            if (editBtn) {
+                // Redirect to the static demo editor
+                editBtn.href = "../../add/editor.html";
+            }
+        }
+    })();
 </script>
 {{ end }}
