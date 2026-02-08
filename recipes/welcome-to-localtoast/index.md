@@ -17,7 +17,7 @@ title: Welcome to LocalToast
 ## Instructions
 **Step 1: Add a Recipe**
 
-Click the **+ Add** button in the top right. Paste a URL from a site like AllRecipes, FoodNetwork, or BBC Good Food. LocalToast will extract the title, image, ingredients, and instructions automatically.
+Click the **+ Add** button in the top right. Paste a URL from a site like AllRecipes, Serious Eats, etc. LocalToast will extract the title, image, ingredients, and instructions automatically.
 
 **Step 2: Review and Edit**
 
