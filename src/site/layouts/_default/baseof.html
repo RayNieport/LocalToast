@@ -20,11 +20,11 @@
     
     <meta name="description" content="{{ $desc }}">
     
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="icon" href="/favicon.ico">
-    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ "apple-touch-icon.png" | relURL }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ "favicon-32x32.png" | relURL }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ "favicon-16x16.png" | relURL }}">
+    <link rel="icon" href="{{ "favicon.ico" | relURL }}">
+    <link rel="manifest" href="{{ "manifest.json" | relURL }}">
     <meta name="theme-color" content="#121212">
     
     {{/* Performance Strategy: Preload LCP Images
@@ -76,7 +76,7 @@
     </style>
     {{ end }}
 
-    {{ if eq .RelPermalink "/add/" }}
+    {{ if eq .Title "Add Recipe" }}
     <style>
         {{ readFile "static/css/editor.css" | safeCSS }}
     </style>
@@ -87,15 +87,15 @@
     <div class="container">
         <header class="site-header">
             <h1 class="site-title">
-                <a href="/" class="brand-link">
-                    <img src="/logo.png" alt="" class="brand-logo" width="32" height="32">
+                <a href="{{ "/" | relURL }}" class="brand-link">
+                    <img src="{{ "logo.png" | relURL }}" alt="" class="brand-logo" width="32" height="32">
                     <span>{{ .Site.Title }}</span>
                 </a>
             </h1>
 
             <nav class="nav-links">
-                <a href="/tags/" class="nav-link-text">Browse</a>
-                <a href="/add/" class="btn-nav">+ Add</a>
+                <a href="{{ "tags/" | relURL }}" class="nav-link-text">Browse</a>
+                <a href="{{ "add/" | relURL}}" class="btn-nav">+ Add</a>
             </nav>
         </header>
 

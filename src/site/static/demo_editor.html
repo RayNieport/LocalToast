@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Recipe | LocalToast</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/editor.css">
+    
+    <style>
+        /* --- DEMO TOAST STYLES --- */
+        #demo-toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #2a2a2a;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 16px;
+            position: fixed;
+            z-index: 9999;
+            left: 50%;
+            bottom: 30px;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+            border-left: 4px solid #0db7ed;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        #demo-toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container editor-container">
+        <h1>Review & Edit</h1>
+        
+        <div class="error-banner" style="display:block;">
+            <strong>ℹ️ Demo Mode:</strong> This is a static simulation.<br>
+            <small>Changes made here will not be saved to the server.</small>
+        </div>
+        
+        <form onsubmit="return false;" class="editor-form" id="mainForm">
+            <div class="form-group">
+                <label class="form-label">Recipe Title</label>
+                <div class="input-wrapper">
+                    <input type="text" class="form-input" value="The Best Toast Ever" placeholder="Recipe Title">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Image URL</label>
+                <input type="text" class="form-input" placeholder="http://...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Tags</label>
+                <input type="text" class="form-input" value="breakfast, demo">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Ingredients</label>
+                <textarea class="form-input form-textarea">- 1 slice Bread
+- 1 tbsp Butter</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Instructions</label>
+                <textarea class="form-input form-textarea-large">1. Toast bread.
+2. Apply butter.
+3. Enjoy.</textarea>
+            </div>
+            
+            <div class="editor-actions">
+                <a href="../" class="btn-cancel">Cancel</a>
+                <button type="button" onclick="showToast('💾 Save disabled in Demo Mode')" class="btn-submit btn-save-primary">
+                    Save to Cookbook
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div id="demo-toast"></div>
+
+    <script>
+        function showToast(message) {
+            var x = document.getElementById("demo-toast");
+            x.textContent = message;
+            x.className = "show";
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        }
+    </script>
+</body>
+</html>

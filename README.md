@@ -10,6 +10,8 @@
 
 LocalToast is a homelab application built to combat the bloat of modern recipe websites. It strips away ads, trackers, pop-ups, and the 2,000-word life stories about the author's childhood. LocalToast extracts just the recipe, storing it as a simple text file that loads instantly on pretty much *any* device - from a brand new iPhone to a dusty tablet from 2011.
 
+> **🍽️ Try it out:** [View the Live Demo (Read Only)](https://raynieport.github.io/LocalToast)
+
 ## 📸 Screenshots
 
 <table>
