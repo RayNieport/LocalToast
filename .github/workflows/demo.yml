@@ -22,6 +22,9 @@ jobs:
           mkdir -p src/site/content/recipes
           cp -r recipes/* src/site/content/recipes/
 
+      - name: Disable Relative URLs for Demo
+        run: sed -i 's/relativeURLs = true/relativeURLs = false/' src/site/config.toml
+
       - name: Build
         working-directory: ./src/site
         run: hugo --minify --baseURL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
