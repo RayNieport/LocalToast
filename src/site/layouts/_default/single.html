@@ -169,14 +169,16 @@
         }
     }
 
-    (function() {
-        if (window.location.hostname.indexOf('github.io') > -1) {
-            var editBtn = document.querySelector('a[href^="/edit/"]');
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.location.hostname.includes('github.io')) {
+            
+            var editBtn = document.querySelector('.btn-action');
             if (editBtn) {
-                // Redirect to the static demo editor
-                editBtn.href = "../../add/editor.html";
+                var pathParts = window.location.pathname.split('/recipes/');
+                var rootPath = pathParts[0];
+                editBtn.href = rootPath + "/add/editor.html";
             }
         }
-    })();
+    });
 </script>
 {{ end }}
