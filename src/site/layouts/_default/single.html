@@ -170,15 +170,19 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        if (window.location.hostname.includes('github.io')) {
-            var editBtn = document.querySelector('.btn-edit');
-                if (editBtn) {
-                editBtn.addEventListener('click', function(e) {
-                    e.preventDefault(); 
-                    var pathParts = window.location.pathname.split('/recipes/');
-                    var rootPath = pathParts[0];
-                    window.location.href = rootPath + "/add/editor.html";
-                });
+        if (window.location.hostname.includes('github.io')) {            
+            var form = document.querySelector('.edit-form');
+            if (form) {
+                var pathParts = window.location.pathname.split('/recipes/');
+                var rootPath = pathParts[0]; 
+                var targetUrl = rootPath + "/add/editor.html";
+
+                var btn = form.querySelector('button');
+                var btnClass = btn ? btn.className : 'btn-action';
+                var iconHtml = (btn && btn.querySelector('svg')) ? btn.querySelector('svg').outerHTML : '';
+
+                var newHtml = `<a href="${targetUrl}" class="${btnClass}">${iconHtml} Edit (Demo)</a>`;
+                form.outerHTML = newHtml;
             }
         }
     });
