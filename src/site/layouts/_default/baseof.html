@@ -87,7 +87,7 @@
     <div class="container">
         <header class="site-header">
             <h1 class="site-title">
-                <a href="{{ "/" | relURL }}" class="brand-link">
+                <a href="{{ .Site.Home.RelPermalink }}" class="brand-link">
                     <img src="{{ "logo.png" | relURL }}" alt="" class="brand-logo" width="32" height="32">
                     <span>{{ .Site.Title }}</span>
                 </a>
