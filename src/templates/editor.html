@@ -111,7 +111,7 @@
             <p class="modal-text">Are you sure you want to delete this recipe?<br><br>This action cannot be undone.</p>
             <div class="modal-actions">
                 <button type="button" class="btn-nav btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
-                <button type="button" class="btn-nav btn-danger-confirm" onclick="confirmDelete()">Yes, Delete</button>
+                <button type="button" id="confirmDeleteBtn" class="btn-nav btn-danger-confirm" onclick="confirmDelete(this)">Yes, Delete</button>
             </div>
         </div>
     </div>
@@ -263,7 +263,13 @@
             if(el) el.style.display = 'none';
         }
 
-        function confirmDelete() {
+        function confirmDelete(btn) {
+            // Disable the button to prevent multiple clicks
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Deleting..."; 
+            }
+            
             document.getElementById('deleteForm').submit();
         }
 
