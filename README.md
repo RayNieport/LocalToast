@@ -74,6 +74,16 @@ That's it. Access LocalToast at `http://localhost:8080`.
 
 > **Note:** The container runs as a non-root user (UID 1000). Ensure your `./recipes` folder is writable by your local user.
 
+## 🔒 Security & Remote Access
+
+**LocalToast is designed strictly for Local Area Network (LAN) use and should NEVER be exposed to the public internet.** To keep the application as lightweight and fast as possible (especially for legacy devices), LocalToast intentionally **does not include any authentication or login screens**. Anyone who can access the URL has full permission to add, edit, or delete your recipes.
+
+* **Do not** port-forward LocalToast through your router.
+* **Do not** put it behind a public-facing reverse proxy without adding your own robust authentication layer (like Authelia or basic auth).
+
+**Need to access your cookbook away from home?**
+We strongly recommend using a secure mesh VPN like [Tailscale](https://tailscale.com/) or [WireGuard](https://www.wireguard.com/). This allows you to securely access your LocalToast instance from anywhere in the world while keeping it completely invisible to the public internet.
+
 ## 🛠️ Architecture
 
 LocalToast uses a **Supervisord** managed container to run three services efficiently:
