@@ -22,7 +22,12 @@ import html
 import socket
 import uuid
 
-app = FastAPI()
+__version__ = "1.0.0"
+
+app = FastAPI(
+    title="LocalToast",
+    version=__version__
+)
 
 # --- CONFIGURATION ---
 CONTENT_DIR = "/app/site/content/recipes"
