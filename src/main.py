@@ -344,14 +344,16 @@ def edit_recipe(request: Request, slug: str = Form(None)):
         data = load_existing_recipe(slug)
         if data: context.update(data)
         else: context["error"] = f"Could not load recipe: {slug}"
-    return templates.TemplateResponse("editor.html", context)
+    return templates.TemplateResponse(request=request, name="editor.html", context=context)
 
 @app.post("/stage")
 def stage_recipe(request: Request, url: str = Form(None)):
     if not url or not is_safe_url(url): 
-        return templates.TemplateResponse("editor.html", {
-            "request": request, "known_tags": get_cached_tags(), "error": "Invalid URL"
-        })
+        return templates.TemplateResponse(
+            request=request, 
+            name="editor.html", 
+            context={"known_tags": get_cached_tags(), "error": "Invalid URL"}
+        )
 
     context = {"request": request, "known_tags": get_cached_tags(), "source_url": url, "error": None}
     try:
@@ -361,7 +363,7 @@ def stage_recipe(request: Request, url: str = Form(None)):
         scraped['ingredients'] = "\n".join(scraped['ingredients'])
         context.update(scraped)
     except Exception as e: context["error"] = str(e)
-    return templates.TemplateResponse("editor.html", context)
+    return templates.TemplateResponse(request=request, name="editor.html", context=context)
 
 @app.post("/save")
 async def save_recipe(
@@ -446,9 +448,11 @@ def bulk_import(request: Request, urls: str = Form(None)):
             staged_items.append({"id": idx, "success": False, "url": url, "message": str(e)})
             
     PENDING_BATCHES[batch_id] = {"timestamp": time.time(), "items": staged_items}    
-    return templates.TemplateResponse("bulk_results.html", {
-        "request": request, "results": staged_items, "batch_id": batch_id, "known_tags": get_cached_tags()
-    })
+    return templates.TemplateResponse(
+        request=request, 
+        name="bulk_results.html", 
+        context={"results": staged_items, "batch_id": batch_id, "known_tags": get_cached_tags()}
+    )
 
 @app.post("/bulk-commit")
 def bulk_commit(payload: BulkCommitPayload):
